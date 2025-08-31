@@ -78,38 +78,18 @@ python mouse_robot.py
 - Python 3.13：使用 onedir 模式（整個資料夾）
 - 想要單一 exe：改用 Python 3.12 再打包 onefile
 
-### 快速方式 1：互動腳本（推薦）
-```bash
-build_exe.bat
-```
-功能：
-- 自動偵測 Python 版本
-- Python 3.13+ 預設選 onedir，可選強制 onefile（可能失敗）
-- 自動清理舊輸出、使用 `images/Mazinger_Z.ico`
 
-輸出：
-- onedir 模式：`dist/MouseRobot/MouseRobot.exe` （分發時整個 `MouseRobot` 資料夾一起打包）
-- onefile 模式：`dist/MouseRobot.exe`
-
-### 快速方式 2：建立 3.12 環境並 onefile 打包
-```bash
-build_312_env.bat
-```
-此批次檔會：
-1. 檢查是否有 Python 3.12（若沒有會提示下載）
-2. 建立虛擬環境 `env312`
-3. 安裝依賴並使用 `--onefile --windowed` 打包
 
 ### 手動打包（自訂）
 啟動現有環境（例：`env01`）：
 ```bash
 env01\Scripts\activate
 pip install pyinstaller
-pyinstaller --clean --windowed --onedir --name=MouseRobot --icon=images\Mazinger_Z.ico --add-data=images;images mouse_robot.py
+pyinstaller --clean --windowed --onedir --name=MouseRobot --icon=images\Mazinger_Z.ico --add-data="images;images" mouse_robot.py
 ```
 （若已在 Python 3.12 環境且要單檔）
 ```bash
-pyinstaller --clean --windowed --onefile --name=MouseRobot --icon=images\Mazinger_Z.ico --add-data=images;images mouse_robot.py
+pyinstaller --clean --windowed --onefile --name=MouseRobot --icon=images\Mazinger_Z.ico --add-data="images;images" mouse_robot.py
 ```
 
 ### 參數重點
@@ -119,7 +99,7 @@ pyinstaller --clean --windowed --onefile --name=MouseRobot --icon=images\Mazinge
 | --onefile | 產生單一 exe（3.13 可能失敗） |
 | --windowed | 隱藏 console 視窗 |
 | --icon | 指定 .ico 圖示 |
-| --add-data=images;images | 打包資源資料夾 |
+| --add-data="images;images" | 打包資源資料夾 |
 
 ### 分發建議
 | 模式 | 內容 | 分發方式 |
@@ -145,19 +125,10 @@ Could not load PyInstaller's embedded PKG archive
 3. 圖示建議使用 **.ico**（已提供 `images/Mazinger_Z.ico`）。
 
 ### 快速使用 onedir 模式
-```
-pyinstaller --clean --windowed --onedir --name=MouseRobot --icon=images\Mazinger_Z.ico --add-data=images;images mouse_robot.py
+```bash
+pyinstaller --clean --windowed --onedir --name=MouseRobot --icon=images\Mazinger_Z.ico --add-data="images;images" mouse_robot.py
 ```
 發佈時請整個 `dist/MouseRobot` 資料夾一起複製。
-
-### 一鍵互動打包腳本（自動判斷版本）
-執行 `build_exe.bat`，在 Python 3.13 會預設使用 onedir，並可強制選 onefile（可能失敗）。
-
-### 使用 Python 3.12 建立 onefile
-已提供 `build_312_env.bat`：
-1. 安裝對應的 Python 3.12（若未安裝會提示下載）。
-2. 自動建立 `env312` 虛擬環境並安裝依賴。
-3. 使用 onefile 模式打包。
 
 ### 仍出錯時排查清單
 | 問題 | 檢查項 | 解法 |
