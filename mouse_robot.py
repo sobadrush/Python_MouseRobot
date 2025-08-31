@@ -4,15 +4,18 @@ import pyautogui
 import math
 import threading
 import time
+import win32api
+import win32con
+import ctypes
 
 class MouseRobotApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("滑鼠機器人")
+        self.root.title("滑鼠機器人 - 防螢幕保護程式")
         
         # 視窗大小設定
-        window_width = 450
-        window_height = 400
+        window_width = 500
+        window_height = 450
         
         # 獲取螢幕尺寸
         screen_width = self.root.winfo_screenwidth()
@@ -129,6 +132,39 @@ class MouseRobotApp:
             )
             rb.pack(side='left', padx=(0, 20))
         
+        # 建立活動類型選擇框架
+        activity_frame = tk.Frame(main_frame, bg='#0f0f23')
+        activity_frame.pack(pady=(0, 20))
+        
+        # 活動類型標籤
+        activity_label = tk.Label(
+            activity_frame,
+            text="活動類型：",
+            font=('Microsoft YaHei', 12, 'bold'),
+            bg='#0f0f23',
+            fg='#ffffff'
+        )
+        activity_label.pack(side='left', padx=(0, 15))
+        
+        # 活動類型選擇
+        self.activity_type = tk.StringVar(value="滑鼠移動+點擊")
+        activity_types = [("僅移動", "僅移動"), ("滑鼠移動+點擊", "滑鼠移動+點擊"), ("滑鼠+鍵盤", "滑鼠+鍵盤")]
+        
+        for text, value in activity_types:
+            rb = tk.Radiobutton(
+                activity_frame,
+                text=text,
+                variable=self.activity_type,
+                value=value,
+                font=('Microsoft YaHei', 10),
+                bg='#0f0f23',
+                fg='#00ffff',
+                selectcolor='#1a1a2e',
+                activebackground='#0f0f23',
+                activeforeground='#00ffff'
+            )
+            rb.pack(side='left', padx=(0, 20))
+        
         # 建立啟動按鈕
         self.start_button = tk.Button(
             main_frame,
@@ -154,7 +190,7 @@ class MouseRobotApp:
         # 建立提示標籤
         hint_label = tk.Label(
             main_frame,
-            text="按空白鍵切換啟動/停止狀態",
+            text="按空白鍵切換啟動/停止狀態 | 防止螢幕保護程式和自動登出",
             font=('Microsoft YaHei', 9),
             bg='#0f0f23',
             fg='#888888'
@@ -201,7 +237,10 @@ class MouseRobotApp:
 
 Author: Roger Lo
 GitHub: https://github.com/sobadrush/Python_MouseRobot.git
-Version: v20250828"""
+Version: v20250828
+
+功能說明：
+此程式透過模擬滑鼠和鍵盤活動來防止 Windows 進入螢幕保護程式或自動登出。"""
         msgbox.showinfo("關於", about_info)
         
     def toggle_mouse_circle(self, event=None):
@@ -242,6 +281,25 @@ Version: v20250828"""
             bd=4
         )
         self.status_button.config(text="停止", bg='#1a1a2e', fg='#ff6b6b')
+    
+    def simulate_activity(self, x, y):
+        """模擬滑鼠和鍵盤活動"""
+        activity_type = self.activity_type.get()
+        
+        if activity_type == "僅移動":
+            # 只移動滑鼠
+            pyautogui.moveTo(int(x), int(y))
+        elif activity_type == "滑鼠移動+點擊":
+            # 移動滑鼠並進行左鍵點擊
+            pyautogui.moveTo(int(x), int(y))
+            pyautogui.click(int(x), int(y), button='left')
+        elif activity_type == "滑鼠+鍵盤":
+            # 移動滑鼠並模擬鍵盤活動
+            pyautogui.moveTo(int(x), int(y))
+            # 模擬按下和釋放一個無害的鍵（如 Shift）
+            pyautogui.keyDown('shift')
+            time.sleep(0.01)
+            pyautogui.keyUp('shift')
     
     def mouse_circle_motion(self):
         """滑鼠轉圈運動"""
@@ -307,8 +365,8 @@ Version: v20250828"""
                 x = center_x + triangle_x
                 y = center_y + triangle_y
             
-            # 移動滑鼠
-            pyautogui.moveTo(int(x), int(y))
+            # 模擬活動（移動滑鼠、點擊或鍵盤活動）
+            self.simulate_activity(x, y)
             
             # 更新角度
             angle += angle_step
