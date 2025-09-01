@@ -260,7 +260,8 @@ Version: v20250828
                 fg='white',
                 activebackground='#6a3a3a',
                 relief='sunken',
-                bd=3
+                bd=3,
+                state='disabled'
             )
             self.status_button.config(text="執行中", bg='#1a1a2e', fg='#00ff88')
             self.circle_thread = threading.Thread(target=self.mouse_circle_motion)
@@ -278,7 +279,8 @@ Version: v20250828
             fg='#00ff88',
             activebackground='#3a3a5e',
             relief='raised',
-            bd=4
+            bd=4,
+            state='normal'
         )
         self.status_button.config(text="停止", bg='#1a1a2e', fg='#ff6b6b')
     
