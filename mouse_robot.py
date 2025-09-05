@@ -4,9 +4,12 @@ import pyautogui
 import math
 import threading
 import time
-import win32api
-import win32con
 import ctypes
+
+# Windows 防休眠旗標
+ES_CONTINUOUS = 0x80000000
+ES_SYSTEM_REQUIRED = 0x00000001
+ES_DISPLAY_REQUIRED = 0x00000002
 
 class MouseRobotApp:
     def __init__(self, root):
@@ -230,6 +233,28 @@ class MouseRobotApp:
         self.root.bind('<space>', self.toggle_mouse_circle)
         self.root.bind('<Key-space>', self.toggle_mouse_circle)
         
+        # 防止休眠狀態
+        self._awake_enabled = False
+    
+    def _set_execution_state(self, flags):
+        """設定 Windows 執行狀態以防止休眠/螢幕關閉"""
+        try:
+            ctypes.windll.kernel32.SetThreadExecutionState(flags)
+        except Exception as e:
+            print(f"SetThreadExecutionState 失敗: {e}")
+    
+    def enable_prevent_sleep(self):
+        """啟用防止系統/螢幕休眠"""
+        if not self._awake_enabled:
+            self._awake_enabled = True
+            self._set_execution_state(ES_CONTINUOUS | ES_SYSTEM_REQUIRED | ES_DISPLAY_REQUIRED)
+    
+    def disable_prevent_sleep(self):
+        """關閉防止休眠，恢復預設行為"""
+        if self._awake_enabled:
+            self._awake_enabled = False
+            self._set_execution_state(ES_CONTINUOUS)
+        
     def show_about(self):
         """顯示關於資訊"""
         import tkinter.messagebox as msgbox
@@ -254,6 +279,8 @@ Version: v20250828
         """開始滑鼠轉圈"""
         if not self.is_circling:
             self.is_circling = True
+            # 啟用防休眠
+            self.enable_prevent_sleep()
             self.start_button.config(
                 text="停止", 
                 bg='#5a2a2a', 
@@ -273,6 +300,8 @@ Version: v20250828
     def stop_mouse_circle(self):
         """停止滑鼠轉圈"""
         self.is_circling = False
+        # 關閉防休眠
+        self.disable_prevent_sleep()
         self.start_button.config(
             text="啟動", 
             bg='#2a2a4e', 
@@ -379,6 +408,8 @@ Version: v20250828
     def on_closing(self):
         """視窗關閉時的處理"""
         self.is_circling = False
+        # 關閉前恢復系統預設的休眠行為
+        self.disable_prevent_sleep()
         if self.circle_thread and self.circle_thread.is_alive():
             self.circle_thread.join(timeout=1)
         self.root.destroy()
